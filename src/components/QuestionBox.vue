@@ -23,7 +23,14 @@
         </b-list-group>
 
     
-      <b-button variant="primary" href="#">Submit</b-button>
+      <b-button
+        variant="primary"
+        @click="submitAnswer"
+        :disabled="selectedIndex === null || answered"
+       
+      >
+        Submit
+      </b-button>
       <b-button @click="next" variant="success" href="#">
           NEXT
       </b-button>
@@ -34,6 +41,7 @@
 </template>
 
 <script>
+
 import _ from 'lodash'
 
 export default {
@@ -46,7 +54,9 @@ export default {
   data(){
     return {
       selectedIndex: null,
+      correctIndex: null,
       shuffledAnswers: [],
+      answered: false
     }
   },
   computed: {
@@ -57,9 +67,13 @@ export default {
     }
   },
   watch: {
-    currentQuestion(){
-      this.selectedIndex = null
-      this.shuffleAnswers()
+    currentQuestion: {
+      immediate: true,
+      handler(){
+        this.selectedIndex = null
+        this.answered = false
+        this.shuffleAnswers()
+      }
     }
   },
   methods: {
@@ -67,9 +81,19 @@ export default {
        this.selectedIndex = index
        
      },
+     submitAnswer() {
+      let isCorrect = false
+      if (this.selectedIndex === this.correctIndex) {
+        isCorrect = true
+      }
+      this.answered = true
+      this.increment(isCorrect)
+      
+    },
      shuffleAnswers() {
       let answers = [...this.currentQuestion.incorrect_answers, this.currentQuestion.correct_answer]
       this.shuffledAnswers = _.shuffle(answers)
+      this.correctIndex = this.shuffledAnswers.indexOf(this.currentQuestion.correct_answer)
       
 
      }
@@ -77,7 +101,6 @@ export default {
   },
 }
 </script>
-
 <style scoped>
 .list-group{
   margin-bottom: 15px;
